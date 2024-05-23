@@ -1,65 +1,55 @@
-import { projects,clients } from "../sampleData.js";
-import graphql, { GraphQLID, GraphQLString, GraphQLSchema, GraphQLList } from "graphql"
+
+import graphql, { GraphQLID, GraphQLString, GraphQLSchema, GraphQLList, GraphQLInt } from "graphql"
+import bookData from "../bookData.json" assert { type: "json" };
 
 const {GraphQLObjectType}= graphql
 
-const ClientType = new GraphQLObjectType({
-    name: "Client",
-    fields : ()=> ({
-        id : {type: GraphQLID},
-        name : {type: GraphQLString},
-        email : {type: GraphQLString},
-        phone : {type: GraphQLString}
-    })
-})
-const ProjectType = new GraphQLObjectType({
-    name: "Project",
-    fields : ()=> ({
-        id : {type: GraphQLID},
-        name : {type: GraphQLString},
-        description : {type: GraphQLString},
-        status : {type: GraphQLString},
-        client : {
-            type: ClientType,
-            resolve(parent, args) {
-                return clients.find(client => client.id === parent.clientId)
-            }
-        }
-    })
-})
 
-const RootQuery = new GraphQLObjectType({
+// Define the TokenType
+const TokenType = new GraphQLObjectType({
+    name: "Token",
+    fields: () => ({
+      position: { type: new GraphQLList(GraphQLInt) },
+      value: { type: GraphQLString }
+    })
+  });
+  
+  // Define the PageType
+  const PageType = new GraphQLObjectType({
+    name: "Page",
+    fields: () => ({
+      pageIndex: { type: GraphQLInt },
+      content: { type: GraphQLString },
+      tokens: { type: new GraphQLList(TokenType) }
+    })
+  });
+  
+  // Define the BookType
+  const BookType = new GraphQLObjectType({
+    name: "Book",
+    fields: () => ({
+      title: { type: GraphQLString },
+      author: { type: GraphQLString },
+      pages: { type: new GraphQLList(PageType) }
+    })
+  });
+  
+  // Define the RootQuery
+  const RootQuery = new GraphQLObjectType({
     name: "RootQueryType",
-    fields : {
-        projects :{
-            type: GraphQLList(ProjectType),
-            resolve (parent,args) {
-                return projects
-            }
-        },
-        project :{
-            type : ProjectType,
-            args : {id: {type: GraphQLID}},
-            resolve(parent, args) {
-                return projects.find(project=> project.id === args.id)
-            }
-        },
-        clients :{
-            type: GraphQLList(ClientType),
-            resolve (parent,args) {
-                return clients
-            }
-        },
-        client :{
-            type : ClientType,
-            args : {id: {type: GraphQLID}},
-            resolve(parent, args) {
-                return clients.find(client=> client.id === args.id)
-            }
+    fields: {
+      book: {
+        type: BookType,
+        resolve(parent, args) {
+          return bookData;
         }
+      }
     }
+  });
 
-})
+
+
+
 const schema = new GraphQLSchema({
     query: RootQuery
 });

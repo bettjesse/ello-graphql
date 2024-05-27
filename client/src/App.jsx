@@ -12,7 +12,7 @@ const client = new ApolloClient({
 
 <FirstBook/>
 
- <h1 className=" text-red-500"> text</h1>
+
  </ApolloProvider>
  </>
   )
